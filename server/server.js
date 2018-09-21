@@ -41,6 +41,7 @@ app.get('/buses_ingresos', (req,res)=>{
     page_title: 'Registro de Ingresos'
   });
 });
+
 app.get('/buses_egresos', (req,res)=>{
   res.render('buses_egresos.hbs',{
     page_title: 'Registro de Egresos'
@@ -49,17 +50,43 @@ app.get('/buses_egresos', (req,res)=>{
 
 app.get('/placas_placas', (req,res)=>{
   res.render('placas_placas.hbs',{
-    page_title: 'Control de Autobuses'
+    page_title: 'Control de Placas'
   });
 });
+
 app.get('/placas_cuotas', (req,res)=>{
   res.render('placas_cuotas.hbs',{
-    page_title: 'Control de Autobuses'
+    page_title: 'Control de Cuotas'
   });
 });
+
 app.get('/placas_cliente', (req,res)=>{
   res.render('placas_cliente.hbs',{
-    page_title: 'Control de Autobuses'
+    page_title: 'Control de Clientes'
+  });
+});
+
+app.get('/amigo_conductores', (req,res)=>{
+  res.render('amigo_conductores.hbs',{
+    page_title: 'Administración de Conductores'
+  });
+});
+
+app.get('/amigo_unidades', (req,res)=>{
+  res.render('amigo_unidades.hbs',{
+    page_title: 'Control de unidades'
+  });
+});
+
+app.get('/amigo_ingresos', (req,res)=>{
+  res.render('amigo_ingresos.hbs',{
+    page_title: 'Control de Ingresos'
+  });
+});
+
+app.get('/amigo_egresos', (req,res)=>{
+  res.render('amigo_egresos.hbs',{
+    page_title: 'Control de Egresos'
   });
 });
 

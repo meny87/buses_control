@@ -6,6 +6,8 @@ const hbs = require('hbs');
 const publicPath = path.join(__dirname, '../public');
 const partialsPath = path.join(__dirname, '../views/partials');
 
+const port = process.env.PORT || 3000;
+
 var app = express();
 var server = http.createServer(app);
 
@@ -90,6 +92,6 @@ app.get('/amigo_egresos', (req,res)=>{
   });
 });
 
-server.listen(3000, ()=>{
+server.listen(port, ()=>{
   console.log('Server is up and listening in port 3000');
 });

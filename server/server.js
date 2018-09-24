@@ -90,30 +90,72 @@ app.get('/amigo_unidades', (req, res) => {
   });
 });
 
+
 app.get('/amigo_ingresos_create', (req, res) => {
-  res.render('amigo_ingresos_create.hbs', {
-    page_title: 'Registrar Nuevos Ingresos',
-    current_week: moment().format('w'),
-    current_year: moment().format('YY')
-  });
-});
-
-app.get('/amigo_ingresos_view', (req, res) => {
-  if(req.query.unidad){
-    var client = new Client();
-    var serviceName = '/cuotas';
-
-    var args = {
-      data: req.query,
-      headers: {
-        "Content-Type": "application/json"
-      }
-    };
-
-    var serviceUrl = url.parse(`${serviceURL}${serviceName}`);
-    client.post(serviceUrl, args, (data, response)=>{});
+  var client = new Client();
+  var serviceName = '';
+  var args = {
+    headers: {
+      "Content-Type": "application/json"
+    }
   };
 
+  var obj = {
+    page_title: 'Registrar Nuevos Ingresos',
+    current_week: moment().format('w'),
+    current_year: moment().format('YY'),
+    post_result: 'info'
+  };
+
+  if (req.query.update === 'yes') {
+    if (req.query.income === 'cuota') {
+      serviceName = '/cuotas';
+      args.data = req.query;
+
+      var serviceUrl = url.parse(`${serviceURL}${serviceName}`);
+
+      client.post(serviceUrl, args, (data, response) => {
+        if (!data.status) {
+          obj.post_result = 'success';
+          obj.post_comments_title = `Cuota Registrada Exitosamente - (${moment().format('D/MMM/YYYY h:mm a')})`;
+          obj.post_comments_content = `Pago de $${req.query.cantidad} pesos registrado de la unidad ${req.query.unidad}.`;
+          res.render('amigo_ingresos_create.hbs', obj);
+        } else {
+          obj.post_result = 'danger';
+          obj.post_comments_title = 'Registro Duplicado';
+          obj.post_comments_content = `Ya se ha registrado un Pago de Cuota para la Unidad ${req.query.unidad} para el periodo ${req.query.periodo}`;
+          res.render('amigo_ingresos_create.hbs', obj);
+        }
+      }).on('error', (err) => {
+        obj.post_result = 'warning';
+        obj.post_comments_title = 'Error al guardar la CUOTA';
+        obj.post_comments_content = `Por favor vuelva a intentarlo y reporte el siguiente error: ${err}`;
+        res.render('amigo_ingresos_create.hbs', obj);
+      });
+    } else {
+      serviceName = '/penalizaciones';
+      args.data = req.query;
+
+      var serviceUrl = url.parse(`${serviceURL}${serviceName}`);
+
+      client.post(serviceUrl, args, (data, response) => {
+        obj.post_result = 'success';
+        obj.post_comments_title = `Penalización Registrada Exitosamente - (${moment().format('D/MMM/YYYY h:mm a')})`;
+        obj.post_comments_content = `Pago de $${req.query.cantidad} pesos registrado de la unidad ${req.query.unidad}.`;
+        res.render('amigo_ingresos_create.hbs', obj);
+      }).on('error', (err) => {
+        obj.post_result = 'warning';
+        obj.post_comments_title = 'Error al guardar la PENALIZACION';
+        obj.post_comments_content = `Por favor vuelva a intentarlo y reporte el siguiente error: ${err}`;
+        res.render('amigo_ingresos_create.hbs', obj);
+      });
+    }
+  } else {
+    res.render('amigo_ingresos_create.hbs', obj);
+  };
+});
+
+app.get('/amigo_ing_cuota_view', (req, res) => {
   request({
     url: `${serviceURL}/cuotas`,
     json: true
@@ -124,13 +166,33 @@ app.get('/amigo_ingresos_view', (req, res) => {
 
     var data = {
       cuotas,
-      page_title: 'Consultar Ingresos',
+      page_title: 'Consultar Ingresos - CUOTAS',
       current_week: moment().format('w'),
       current_year: moment().format('YY')
     };
 
     //console.log('Data: ', data);
-    res.render('amigo_ingresos_view.hbs', data);
+    res.render('amigo_ing_cuota_view.hbs', data);
+  });
+});
+
+app.get('/amigo_ing_penalizacion_view', (req, res) => {
+  request({
+    url: `${serviceURL}/penalizaciones`,
+    json: true
+  }, (error, response, body) => {
+    var penalizaciones = body.penalizaciones;
+
+    penalizaciones.map((cuota) => penalizaciones.fecha = moment(penalizaciones.fecha).format('D/MMM/YYYY h:mm a'));
+
+    var data = {
+      penalizaciones,
+      page_title: 'Consultar Ingresos - PENALIZACIONES',
+      current_week: moment().format('w'),
+      current_year: moment().format('YY')
+    };
+
+    res.render('amigo_ing_penalizacion_view.hbs', data);
   });
 });
 
